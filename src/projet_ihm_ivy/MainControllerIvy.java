@@ -133,7 +133,28 @@ public class MainControllerIvy {
 			controllerIvy.bindMsg("^OneDollar Reco=Modifier", new IvyMessageListener() {
 				@Override
 				public void receive(IvyClient client, String[] args) {
+					String name = "";
+					int x = 0;
+					int y = 0;
 					
+					try {
+						CountDownLatch signal = new CountDownLatch(1);
+						IvyMsgListenerControllerMovement controllerListenerMovement = new IvyMsgListenerControllerMovement(signal,controllerIvy);
+						while(name.equals("") || name == null || x == 0 || y == 0) {
+							int id = controllerIvy.bindMsg("^sra5 Text=(.*) Confidence=(.*)", controllerListenerMovement, true);
+							signal.await();
+							controllerIvy.unBindMsg(id);
+							name = controllerListenerMovement.getName();
+							x = controllerListenerMovement.getX();
+							y = controllerListenerMovement.getY();
+							System.out.println("name : "+name+" / x : "+x+" / y :"+y);
+							signal = new CountDownLatch(1);
+							controllerListenerMovement.setDoneSignal(signal);
+						}
+						controllerIvy.sendMsg("Palette:DeplacerObjetAbsolu nom="+name+" x="+x+" y="+y);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
 			},true);
 			
