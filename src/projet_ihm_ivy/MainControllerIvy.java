@@ -11,9 +11,11 @@ import fr.dgac.ivy.IvyMessageListener;
 public class MainControllerIvy {
 
 	private static Ivy controllerIvy;
+	private static boolean inAction;
 	
 	public static void main(String[] args){
 		controllerIvy = new Ivy("ControllerIvy", "ControllerIvy launch", null);
+		inAction = false;
 		try {
 			controllerIvy.start("127.255.255.255:2010");
 			
@@ -21,33 +23,83 @@ public class MainControllerIvy {
 			controllerIvy.bindMsg("^OneDollar Reco=Rectangle", new IvyMessageListener() {
 				@Override
 				public void receive(IvyClient client, String[] args) {
-					int xRect = 0;
-					int yRect = 0;
-					
-					// Detection de la voix pour la couleur ou la position
-					try {
-						Timer timer5Sec = new Timer();
-						CountDownLatch positionSignal = new CountDownLatch(1);
-						timer5Sec.schedule(new Timer5SecTask(positionSignal), 5000);
-						IvyMsgListenerPosition positionListener = new IvyMsgListenerPosition(positionSignal,controllerIvy,timer5Sec);
-						int idPos = controllerIvy.bindMsgOnce("^sra5 Text=(.*) Confidence=(.*)", positionListener);
-						//positionSignal.await();
-						controllerIvy.waitForMsg("^sra5 Text=(.*) Confidence=(.*)", 5000);
-						controllerIvy.unBindMsg(idPos);
-						xRect = positionListener.getX();
-						yRect = positionListener.getY();
-						System.out.println(xRect+" / "+yRect);
-					} catch (Exception e) {
-						e.printStackTrace();
+					if(!inAction) {
+						inAction = true;
+						int xRect = 0;
+						int yRect = 0;
+						String color = "black";
+						
+						// Detection de la voix pour la couleur ou la position
+						try {
+							Timer timer5Sec = new Timer();
+							CountDownLatch signal = new CountDownLatch(1);
+							timer5Sec.schedule(new Timer5SecTask(signal), 5000);
+							IvyMsgListenerController controllerListener = new IvyMsgListenerController(signal,controllerIvy,timer5Sec);
+							int id = controllerIvy.bindMsg("^sra5 Text=(.*) Confidence=(.*)", controllerListener);
+							signal.await();
+							controllerIvy.unBindMsg(id);
+							if(controllerListener.getX() != 0 || !controllerListener.getColor().equals("noir")) {
+								Timer timer5Sec2 = new Timer();
+								CountDownLatch signal2 = new CountDownLatch(1);
+								timer5Sec2.schedule(new Timer5SecTask(signal2), 5000);
+								controllerListener.setDoneSignal(signal2);
+								controllerListener.setTimer5Sec(timer5Sec2);
+								id = controllerIvy.bindMsg("^sra5 Text=(.*) Confidence=(.*)", controllerListener);
+								signal2.await();
+								controllerIvy.unBindMsg(id);
+							}
+							xRect = controllerListener.getX();
+							yRect = controllerListener.getY();
+							color = controllerListener.getColor();
+							controllerIvy.sendMsg("Palette:CreerRectangle x="+xRect+" y="+yRect+" longueur=50 hauteur=20 couleurFond="+color+" couleurContour="+color);
+							System.out.println(xRect+" / "+yRect+" / "+color);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 					}
+					inAction = false;
 				}
 			});
 			
 			// Choix de creation d'une ellipse
-			controllerIvy.bindMsg("^OneDollar Reco=ellipse", new IvyMessageListener() {
+			controllerIvy.bindMsg("^OneDollar Reco=Ellipse", new IvyMessageListener() {
 				@Override
 				public void receive(IvyClient client, String[] args) {
-					
+					if(!inAction) {
+						inAction = true;
+						int xRect = 0;
+						int yRect = 0;
+						String color = "black";
+						
+						// Detection de la voix pour la couleur ou la position
+						try {
+							Timer timer5Sec = new Timer();
+							CountDownLatch signal = new CountDownLatch(1);
+							timer5Sec.schedule(new Timer5SecTask(signal), 5000);
+							IvyMsgListenerController controllerListener = new IvyMsgListenerController(signal,controllerIvy,timer5Sec);
+							int id = controllerIvy.bindMsg("^sra5 Text=(.*) Confidence=(.*)", controllerListener);
+							signal.await();
+							controllerIvy.unBindMsg(id);
+							if(controllerListener.getX() != 0 || !controllerListener.getColor().equals("black")) {
+								Timer timer5Sec2 = new Timer();
+								CountDownLatch signal2 = new CountDownLatch(1);
+								timer5Sec2.schedule(new Timer5SecTask(signal2), 5000);
+								controllerListener.setDoneSignal(signal2);
+								controllerListener.setTimer5Sec(timer5Sec2);
+								id = controllerIvy.bindMsg("^sra5 Text=(.*) Confidence=(.*)", controllerListener);
+								signal2.await();
+								controllerIvy.unBindMsg(id);
+							}
+							xRect = controllerListener.getX();
+							yRect = controllerListener.getY();
+							color = controllerListener.getColor();
+							controllerIvy.sendMsg("Palette:CreerEllipse x="+xRect+" y="+yRect+" longueur=20 hauteur=50 couleurFond="+color+" couleurContour="+color);
+							System.out.println(xRect+" / "+yRect+" / "+color);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+					inAction = false;
 				}
 			});
 			
@@ -55,7 +107,11 @@ public class MainControllerIvy {
 			controllerIvy.bindMsg("^OneDollar Reco=Supprimer", new IvyMessageListener() {
 				@Override
 				public void receive(IvyClient client, String[] args) {
-					
+					try {
+						controllerIvy.sendMsg("Palette:DemanderInfo nom=R5");
+					} catch (IvyException e) {
+						e.printStackTrace();
+					}
 				}
 			});
 			
