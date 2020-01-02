@@ -23,7 +23,7 @@ public class ResultTestPoint implements IvyMessageListener{
 		try {
 			CountDownLatch colorSignal = new CountDownLatch(1);
 			Info info = new Info(colorSignal);
-			int id = this.controllerIvy.bindMsg("^Palette:Info nom="+args[2]+" x="+args[0]+" y="+args[1]+" longueur=(.*) hauteur=(.*) couleurFond=(.*) couleurContour=(.*)", info);
+			int id = this.controllerIvy.bindMsg("^Palette:Info nom=(.*) x=(.*) y=(.*) longueur=(.*) hauteur=(.*) couleurFond=(.*) couleurContour=(.*)", info, true);
 			this.controllerIvy.sendMsg("Palette:DemanderInfo nom="+args[2]);
 			colorSignal.await();
 			this.controllerIvy.unBindMsg(id);

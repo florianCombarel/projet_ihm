@@ -23,7 +23,7 @@ public class IvyMsgListenerColor implements IvyMessageListener{
 		try {
 			CountDownLatch testPointSignal = new CountDownLatch(1);
 			ResultTestPoint resultTestPoint = new ResultTestPoint(this.controllerIvy, testPointSignal);
-			int id = this.controllerIvy.bindMsg("^Palette:ResultatTesterPoint x="+args[0]+" y="+args[1]+" nom=(.*)", resultTestPoint);
+			int id = this.controllerIvy.bindMsg("^Palette:ResultatTesterPoint x=(.*) y=(.*) nom=(.*)", resultTestPoint, true);
 			this.controllerIvy.sendMsg("Palette:TesterPoint x="+args[0]+" y="+args[1]);
 			testPointSignal.await();
 			this.controllerIvy.unBindMsg(id);

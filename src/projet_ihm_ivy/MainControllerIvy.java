@@ -35,7 +35,7 @@ public class MainControllerIvy {
 							CountDownLatch signal = new CountDownLatch(1);
 							timer5Sec.schedule(new Timer5SecTask(signal), 5000);
 							IvyMsgListenerController controllerListener = new IvyMsgListenerController(signal,controllerIvy,timer5Sec);
-							int id = controllerIvy.bindMsg("^sra5 Text=(.*) Confidence=(.*)", controllerListener);
+							int id = controllerIvy.bindMsg("^sra5 Text=(.*) Confidence=(.*)", controllerListener, true);
 							signal.await();
 							controllerIvy.unBindMsg(id);
 							if(controllerListener.getX() != 0 || !controllerListener.getColor().equals("noir")) {
@@ -44,7 +44,7 @@ public class MainControllerIvy {
 								timer5Sec2.schedule(new Timer5SecTask(signal2), 5000);
 								controllerListener.setDoneSignal(signal2);
 								controllerListener.setTimer5Sec(timer5Sec2);
-								id = controllerIvy.bindMsg("^sra5 Text=(.*) Confidence=(.*)", controllerListener);
+								id = controllerIvy.bindMsg("^sra5 Text=(.*) Confidence=(.*)", controllerListener, true);
 								signal2.await();
 								controllerIvy.unBindMsg(id);
 							}
@@ -59,7 +59,7 @@ public class MainControllerIvy {
 					}
 					inAction = false;
 				}
-			});
+			}, true);
 			
 			// Choix de creation d'une ellipse
 			controllerIvy.bindMsg("^OneDollar Reco=Ellipse", new IvyMessageListener() {
@@ -101,7 +101,7 @@ public class MainControllerIvy {
 					}
 					inAction = false;
 				}
-			});
+			},true);
 			
 			// Choix de suppression d'un objet
 			controllerIvy.bindMsg("^OneDollar Reco=Supprimer", new IvyMessageListener() {
@@ -113,7 +113,7 @@ public class MainControllerIvy {
 						e.printStackTrace();
 					}
 				}
-			});
+			},true);
 			
 			// Choix de deplacement d'un objet
 			controllerIvy.bindMsg("^OneDollar Reco=Modifier", new IvyMessageListener() {
@@ -121,7 +121,7 @@ public class MainControllerIvy {
 				public void receive(IvyClient client, String[] args) {
 					
 				}
-			});
+			},true);
 			
 		} catch (IvyException e) {
 			e.printStackTrace();

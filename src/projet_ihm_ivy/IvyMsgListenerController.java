@@ -38,8 +38,9 @@ public class IvyMsgListenerController implements IvyMessageListener {
 					CountDownLatch xySignal = new CountDownLatch(1);
 					IvyMsgListenerXY xyListener = new IvyMsgListenerXY(xySignal);
 					try {
-						this.controllerIvy.bindMsgOnce("^Palette:MousePressed x=(.*) y=(.*)", xyListener);
+						int id = this.controllerIvy.bindMsg("^Palette:MousePressed x=(.*) y=(.*)", xyListener, true);
 						xySignal.await();
+						this.controllerIvy.unBindMsg(id);
 						this.x = xyListener.getX();
 						this.y = xyListener.getY();
 					} catch (Exception e) {
@@ -71,7 +72,7 @@ public class IvyMsgListenerController implements IvyMessageListener {
 					CountDownLatch colorSignal = new CountDownLatch(1);
 					IvyMsgListenerColor colorListener = new IvyMsgListenerColor(colorSignal,controllerIvy);
 					try {
-						int id = this.controllerIvy.bindMsg("^Palette:MousePressed x=(.*) y=(.*)", colorListener);
+						int id = this.controllerIvy.bindMsg("^Palette:MousePressed x=(.*) y=(.*)", colorListener, true);
 						colorSignal.await();
 						this.controllerIvy.unBindMsg(id);
 						this.color = colorListener.getColor();
