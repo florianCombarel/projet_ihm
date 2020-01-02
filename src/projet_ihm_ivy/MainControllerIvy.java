@@ -118,7 +118,7 @@ public class MainControllerIvy {
 						signal.await();
 						controllerIvy.unBindMsg(id);
 						name = controllerListenerSuppr.getName();
-						if(name != null) {
+						if(name != null && !name.equals("")) {
 							controllerIvy.sendMsg("Palette:SupprimerObjet nom="+name);
 						} else {
 							System.out.println("Suppression impossible");
