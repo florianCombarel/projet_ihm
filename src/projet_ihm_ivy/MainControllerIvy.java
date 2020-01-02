@@ -77,7 +77,7 @@ public class MainControllerIvy {
 							CountDownLatch signal = new CountDownLatch(1);
 							timer5Sec.schedule(new Timer5SecTask(signal), 5000);
 							IvyMsgListenerController controllerListener = new IvyMsgListenerController(signal,controllerIvy,timer5Sec);
-							int id = controllerIvy.bindMsg("^sra5 Text=(.*) Confidence=(.*)", controllerListener);
+							int id = controllerIvy.bindMsg("^sra5 Text=(.*) Confidence=(.*)", controllerListener, true);
 							signal.await();
 							controllerIvy.unBindMsg(id);
 							if(controllerListener.getX() != 0 || !controllerListener.getColor().equals("black")) {
@@ -86,7 +86,7 @@ public class MainControllerIvy {
 								timer5Sec2.schedule(new Timer5SecTask(signal2), 5000);
 								controllerListener.setDoneSignal(signal2);
 								controllerListener.setTimer5Sec(timer5Sec2);
-								id = controllerIvy.bindMsg("^sra5 Text=(.*) Confidence=(.*)", controllerListener);
+								id = controllerIvy.bindMsg("^sra5 Text=(.*) Confidence=(.*)", controllerListener, true);
 								signal2.await();
 								controllerIvy.unBindMsg(id);
 							}
@@ -107,9 +107,23 @@ public class MainControllerIvy {
 			controllerIvy.bindMsg("^OneDollar Reco=Supprimer", new IvyMessageListener() {
 				@Override
 				public void receive(IvyClient client, String[] args) {
+					String name = null;
+					
 					try {
-						controllerIvy.sendMsg("Palette:DemanderInfo nom=R5");
-					} catch (IvyException e) {
+						Timer timer5Sec = new Timer();
+						CountDownLatch signal = new CountDownLatch(1);
+						timer5Sec.schedule(new Timer5SecTask(signal), 5000);
+						IvyMsgListenerControllerSuppression controllerListenerSuppr = new IvyMsgListenerControllerSuppression(signal,controllerIvy,timer5Sec);
+						int id = controllerIvy.bindMsg("^sra5 Text=(.*) Confidence=(.*)", controllerListenerSuppr, true);
+						signal.await();
+						controllerIvy.unBindMsg(id);
+						name = controllerListenerSuppr.getName();
+						if(name != null) {
+							controllerIvy.sendMsg("Palette:SupprimerObjet nom="+name);
+						} else {
+							System.out.println("Suppression impossible");
+						}
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
